@@ -7,8 +7,6 @@ var Text = w.Text
 
 function context () {
 
-  var cleanupFuncs = []
-
   function h() {
     var args = [].slice.call(arguments), e = null
     function item (l) {
@@ -61,22 +59,13 @@ function context () {
               (function (k, l) { // capture k, l in the closure
                 if (e.addEventListener){
                   e.addEventListener(k.substring(2), l[k], false)
-                  cleanupFuncs.push(function(){
-                    e.removeEventListener(k.substring(2), l[k], false)
-                  })
                 }else{
                   e.attachEvent(k, l[k])
-                  cleanupFuncs.push(function(){
-                    e.detachEvent(k, l[k])
-                  })
                 }
               })(k, l)
             } else {
               // observable
               e[k] = l[k]()
-              cleanupFuncs.push(l[k](function (v) {
-                e[k] = v
-              }))
             }
           }
           else if(k === 'style') {
@@ -87,9 +76,6 @@ function context () {
                 if('function' === typeof v) {
                   // observable
                   e.style.setProperty(s, v())
-                  cleanupFuncs.push(v(function (val) {
-                    e.style.setProperty(s, val)
-                  }))
                 } else
                   var match = l[k][s].match(/(.*)\W+!important\W*$/);
                   if (match) {
@@ -115,12 +101,6 @@ function context () {
         var v = l()
         e.appendChild(r = isNode(v) ? v : document.createTextNode(v))
 
-        cleanupFuncs.push(l(function (v) {
-          if(isNode(v) && r.parentElement)
-            r.parentElement.replaceChild(v, r), r = v
-          else
-            r.textContent = v
-        }))
       }
 
       return r
@@ -129,13 +109,6 @@ function context () {
       item(args.shift())
 
     return e
-  }
-
-  h.cleanup = function () {
-    for (var i = 0; i < cleanupFuncs.length; i++){
-      cleanupFuncs[i]()
-    }
-    cleanupFuncs.length = 0
   }
 
   return h
