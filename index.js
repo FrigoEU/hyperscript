@@ -1,133 +1,107 @@
-var split = require('browser-split')
-var ClassList = require('class-list')
+var w = typeof window === "undefined" ? require("html-element") : window;
+var hammer = typeof window === "undefined" ? null : require("hammerjs");
 
-var w = typeof window === 'undefined' ? require('html-element') : window
-var document = w.document
-var Text = w.Text
+var document = w.document;
+var Text = w.Text;
 
-function context () {
+if (hammer !== null) {
+  hammer.defaults.preset = [[hammer.Tap]];
+}
 
-  function h() {
-    var args = [].slice.call(arguments), e = null
-    function item (l) {
-      var r
-      function parseClass (string) {
-        // Our minimal parser doesn’t understand escaping CSS special
-        // characters like `#`. Don’t use them. More reading:
-        // https://mathiasbynens.be/notes/css-escapes .
+function h(tagName, attrs) {
+  var children = [].slice.call(arguments, 2);
 
-        var m = split(string, /([\.#]?[^\s#.]+)/)
-        if(/^\.|#/.test(m[1]))
-          e = document.createElement('div')
-        forEach(m, function (v) {
-          var s = v.substring(1,v.length)
-          if(!v) return
-          if(!e)
-            e = document.createElement(v)
-          else if (v[0] === '.')
-            ClassList(e).add(s)
-          else if (v[0] === '#')
-            e.setAttribute('id', s)
-        })
-      }
-
-      if(l == null)
-        ;
-      else if('string' === typeof l) {
-        if(!e)
-          parseClass(l)
-        else
-          e.appendChild(r = document.createTextNode(l))
-      }
-      else if('number' === typeof l
-        || 'boolean' === typeof l
-        || l instanceof Date
-        || l instanceof RegExp ) {
-          e.appendChild(r = document.createTextNode(l.toString()))
-      }
-      //there might be a better way to handle this...
-      else if (isArray(l))
-        forEach(l, item)
-      else if(isNode(l))
-        e.appendChild(r = l)
-      else if(l instanceof Text)
-        e.appendChild(r = l)
-      else if ('object' === typeof l) {
-        for (var k in l) {
-          if('function' === typeof l[k]) {
-            if(/^on\w+/.test(k)) {
-              (function (k, l) { // capture k, l in the closure
-                if (e.addEventListener){
-                  e.addEventListener(k.substring(2), l[k], false)
-                }else{
-                  e.attachEvent(k, l[k])
-                }
-              })(k, l)
-            } else {
-              // observable
-              e[k] = l[k]()
-            }
-          }
-          else if(k === 'style') {
-            if('string' === typeof l[k]) {
-              e.style.cssText = l[k]
-            }else{
-              for (var s in l[k]) (function(s, v) {
-                if('function' === typeof v) {
-                  // observable
-                  e.style.setProperty(s, v())
-                } else
-                  var match = l[k][s].match(/(.*)\W+!important\W*$/);
-                  if (match) {
-                    e.style.setProperty(s, match[1], 'important')
-                  } else {
-                    e.style.setProperty(s, l[k][s])
-                  }
-              })(s, l[k][s])
-            }
-          } else if(k === 'attrs') {
-            for (var v in l[k]) {
-              e.setAttribute(v, l[k][v])
-            }
-          }
-          else if (k.substr(0, 5) === "data-") {
-            e.setAttribute(k, l[k])
-          } else {
-            e[k] = l[k]
-          }
-        }
-      } else if ('function' === typeof l) {
-        //assume it's an observable!
-        var v = l()
-        e.appendChild(r = isNode(v) ? v : document.createTextNode(v))
-
-      }
-
-      return r
-    }
-    while(args.length)
-      item(args.shift())
-
-    return e
+  var e = document.createElement(tagName);
+  if (attrs && typeof attrs === "object" && !isNode(attrs)) {
+    processAttrs(e, attrs);
   }
 
-  return h
+  children.forEach((c) => processChild(e, c));
+
+  return e;
 }
 
-var h = module.exports = context()
-h.context = context
+module.exports = h;
 
-function isNode (el) {
-  return el && el.nodeName && el.nodeType
+function processAttrs(el, attrs) {
+  for (var k in attrs) {
+    if ("function" === typeof attrs[k]) {
+      if (/^on\w+/.test(k)) {
+        if (k === "onclick" && hammer !== null) {
+          let ham = new hammer(el);
+          ham.on("tap", attrs[k]);
+          if (typeof window !== "undefined" && window.scheduleForCleanup) {
+            window.scheduleForCleanup(() => ham.destroy());
+          }
+        } else {
+          el.addEventListener(k.substring(2), attrs[k], false);
+        }
+      }
+    } else if (k === "style") {
+      if ("string" === typeof attrs[k]) {
+        el.style.cssText = attrs[k];
+      } else {
+        for (var s in attrs[k])
+          (function (s, v) {
+            if ("function" === typeof v) {
+              // observable
+              el.style.setProperty(s, v());
+            } else var match = attrs[k][s].match(/(.*)\W+!important\W*$/);
+            if (match) {
+              el.style.setProperty(s, match[1], "important");
+            } else {
+              el.style.setProperty(s, attrs[k][s]);
+            }
+          })(s, attrs[k][s]);
+      }
+    } else if (k === "attrs") {
+      for (var v in attrs[k]) {
+        el.setAttribute(v, attrs[k][v]);
+      }
+    } else if (k.substr(0, 5) === "data-") {
+      el.setAttribute(k, attrs[k]);
+    } else if (
+      k === "href" &&
+      el.nodeName.toLowerCase() === "a" &&
+      hammer !== null
+    ) {
+      let ham = new hammer(el);
+      const link = attrs[k];
+      ham.on("tap", (ev) => {
+        location.href = link;
+        ev.srcEvent.preventDefault();
+      });
+      if (typeof window !== "undefined" && window.scheduleForCleanup) {
+        window.scheduleForCleanup(() => ham.destroy());
+      }
+    } else {
+      el[k] = attrs[k];
+    }
+  }
 }
 
-function forEach (arr, fn) {
-  if (arr.forEach) return arr.forEach(fn)
-  for (var i = 0; i < arr.length; i++) fn(arr[i], i)
+function processChild(el, l) {
+  if (l == null) {
+  } else if ("string" === typeof l) {
+    el.appendChild(document.createTextNode(l));
+  } else if (
+    "number" === typeof l ||
+    "boolean" === typeof l ||
+    l instanceof Date ||
+    l instanceof RegExp
+  ) {
+    el.appendChild(document.createTextNode(l.toString()));
+  }
+  //there might be a better way to handle this...
+  else if (isNode(l)) {
+    el.appendChild(l);
+  } else if (Array.isArray(l)){
+    l.forEach(p => processChild(el, p));
+  } else if (l instanceof Text) {
+    el.appendChild(l);
+  }
 }
 
-function isArray (arr) {
-  return Object.prototype.toString.call(arr) == '[object Array]'
+function isNode(el) {
+  return el && el.nodeName && el.nodeType;
 }
-
-
