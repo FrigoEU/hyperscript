@@ -1,12 +1,7 @@
 var w = typeof window === "undefined" ? require("html-element") : window;
-var hammer = typeof window === "undefined" ? null : window.Hammer;
 
 var document = w.document;
 var Text = w.Text;
-
-if (hammer) {
-  hammer.defaults.preset = [[hammer.Tap]];
-}
 
 function h(tagName, attrs) {
   var children = [].slice.call(arguments, 2);
@@ -27,8 +22,8 @@ function processAttrs(el, attrs) {
   for (var k in attrs) {
     if ("function" === typeof attrs[k]) {
       if (/^on\w+/.test(k)) {
-        if (k === "onclick" && hammer) {
-          let ham = new hammer(el);
+        if (k === "onclick" && window.Hammer) {
+          let ham = new window.Hammer(el);
           ham.on("tap", attrs[k]);
           if (typeof window !== "undefined" && window.scheduleForCleanup) {
             window.scheduleForCleanup(() => ham.destroy());
@@ -63,9 +58,9 @@ function processAttrs(el, attrs) {
     } else if (
       k === "href" &&
       el.nodeName.toLowerCase() === "a" &&
-      hammer !== null
+      window.Hammer !== null
     ) {
-      let ham = new hammer(el);
+      let ham = new window.Hammer(el);
       const link = attrs[k];
       ham.on("tap", (ev) => {
         location.href = link;
