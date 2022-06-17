@@ -1,10 +1,10 @@
 var w = typeof window === "undefined" ? require("html-element") : window;
-var hammer = typeof window === "undefined" ? null : require("hammerjs");
+var hammer = typeof window === "undefined" ? null : window.Hammer;
 
 var document = w.document;
 var Text = w.Text;
 
-if (hammer !== null) {
+if (hammer) {
   hammer.defaults.preset = [[hammer.Tap]];
 }
 
@@ -27,7 +27,7 @@ function processAttrs(el, attrs) {
   for (var k in attrs) {
     if ("function" === typeof attrs[k]) {
       if (/^on\w+/.test(k)) {
-        if (k === "onclick" && hammer !== null) {
+        if (k === "onclick" && hammer) {
           let ham = new hammer(el);
           ham.on("tap", attrs[k]);
           if (typeof window !== "undefined" && window.scheduleForCleanup) {
