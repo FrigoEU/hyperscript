@@ -58,7 +58,7 @@ function processAttrs(el, attrs) {
     } else if (
       k === "href" &&
       el.nodeName.toLowerCase() === "a" &&
-      w.Hammer !== null
+      w.Hammer
     ) {
       let ham = new w.Hammer(el);
       const link = attrs[k];
