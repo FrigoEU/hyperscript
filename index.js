@@ -22,11 +22,11 @@ function processAttrs(el, attrs) {
   for (var k in attrs) {
     if ("function" === typeof attrs[k]) {
       if (/^on\w+/.test(k)) {
-        if (k === "onclick" && window.Hammer) {
-          let ham = new window.Hammer(el);
+        if (k === "onclick" && w.Hammer) {
+          let ham = new w.Hammer(el);
           ham.on("tap", attrs[k]);
-          if (typeof window !== "undefined" && window.scheduleForCleanup) {
-            window.scheduleForCleanup(() => ham.destroy());
+          if (w.scheduleForCleanup) {
+            w.scheduleForCleanup(() => ham.destroy());
           }
         } else {
           el.addEventListener(k.substring(2), attrs[k], false);
@@ -58,16 +58,16 @@ function processAttrs(el, attrs) {
     } else if (
       k === "href" &&
       el.nodeName.toLowerCase() === "a" &&
-      window.Hammer !== null
+      w.Hammer !== null
     ) {
-      let ham = new window.Hammer(el);
+      let ham = new w.Hammer(el);
       const link = attrs[k];
       ham.on("tap", (ev) => {
         location.href = link;
         ev.srcEvent.preventDefault();
       });
-      if (typeof window !== "undefined" && window.scheduleForCleanup) {
-        window.scheduleForCleanup(() => ham.destroy());
+      if (w.scheduleForCleanup) {
+        w.scheduleForCleanup(() => ham.destroy());
       }
     } else {
       el[k] = attrs[k];
