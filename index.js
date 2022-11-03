@@ -24,7 +24,7 @@ function processAttrs(el, attrs) {
       if (/^on\w+/.test(k)) {
         if (k === "onclick" && w.Hammer) {
           let ham = new w.Hammer(el);
-          ham.on("tap press", attrs[k]);
+          ham.on("tap pressup", attrs[k]);
           if (w.scheduleForCleanup) {
             w.scheduleForCleanup(() => ham.destroy());
           }
@@ -62,7 +62,7 @@ function processAttrs(el, attrs) {
     ) {
       let ham = new w.Hammer(el);
       const link = attrs[k];
-      ham.on("tap press", (ev) => {
+      ham.on("tap pressup", (ev) => {
         location.href = link;
         ev.srcEvent.preventDefault();
       });
