@@ -63,7 +63,11 @@ function processAttrs(el, attrs) {
       let ham = new w.Hammer(el);
       const link = attrs[k];
       ham.on("tap pressup", (ev) => {
-        location.href = link;
+        if (link[0] === "#"){
+          location.hash = link;
+        } else {
+          location.href = link;
+        }
         ev.srcEvent.preventDefault();
       });
       if (w.scheduleForCleanup) {
