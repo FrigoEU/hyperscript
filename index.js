@@ -53,14 +53,14 @@ function processAttrs(el, attrs) {
       typeof window !== "undefined" // only clientside
     ) {
       const link = attrs[k];
-      el.addEventListener("click", (ev) => {
-        if (link[0] === "#"){
-          location.hash = link;
-        } else {
-          location.href = link;
-        }
-        ev.srcEvent.preventDefault();
-      });
+      if (link[0] === "#"){
+        el.addEventListener("click", (ev) => {
+          if (link[0] === "#"){
+            location.hash = link;
+          }
+          ev.preventDefault();
+        });
+      }
     } else {
       el[k] = attrs[k];
     }
