@@ -55,9 +55,7 @@ function processAttrs(el, attrs) {
       const link = attrs[k];
       if (link[0] === "#"){
         el.addEventListener("click", (ev) => {
-          if (link[0] === "#"){
-            location.hash = link;
-          }
+          location.hash = link;
           ev.preventDefault();
         });
       }
