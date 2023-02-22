@@ -22,15 +22,7 @@ function processAttrs(el, attrs) {
   for (var k in attrs) {
     if ("function" === typeof attrs[k]) {
       if (/^on\w+/.test(k)) {
-        if (k === "onclick" && w.Hammer) {
-          let ham = new w.Hammer(el);
-          ham.on("tap pressup", attrs[k]);
-          if (w.scheduleForCleanup) {
-            w.scheduleForCleanup(() => ham.destroy());
-          }
-        } else {
-          el.addEventListener(k.substring(2), attrs[k], false);
-        }
+        el.addEventListener(k.substring(2), attrs[k], false);
       }
     } else if (k === "style") {
       if ("string" === typeof attrs[k]) {
@@ -57,12 +49,10 @@ function processAttrs(el, attrs) {
       el.setAttribute(k, attrs[k]);
     } else if (
       k === "href" &&
-      el.nodeName.toLowerCase() === "a" &&
-      w.Hammer
+      el.nodeName.toLowerCase() === "a"
     ) {
-      let ham = new w.Hammer(el);
       const link = attrs[k];
-      ham.on("tap pressup", (ev) => {
+      el.addEventListener("click", (ev) => {
         if (link[0] === "#"){
           location.hash = link;
         } else {
@@ -70,9 +60,6 @@ function processAttrs(el, attrs) {
         }
         ev.srcEvent.preventDefault();
       });
-      if (w.scheduleForCleanup) {
-        w.scheduleForCleanup(() => ham.destroy());
-      }
     } else {
       el[k] = attrs[k];
     }
