@@ -49,7 +49,8 @@ function processAttrs(el, attrs) {
       el.setAttribute(k, attrs[k]);
     } else if (
       k === "href" &&
-      el.nodeName.toLowerCase() === "a"
+      el.nodeName.toLowerCase() === "a" &&
+      w // only clientside
     ) {
       const link = attrs[k];
       el.addEventListener("click", (ev) => {
