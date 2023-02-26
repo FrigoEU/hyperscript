@@ -45,7 +45,7 @@ function processAttrs(el, attrs) {
       for (var v in attrs[k]) {
         el.setAttribute(v, attrs[k][v]);
       }
-    } else if (k.substr(0, 5) === "data-") {
+    } else if (/^(data|aria|role)-/.test(k)) {
       el.setAttribute(k, attrs[k]);
     } else if (
       k === "href" &&
