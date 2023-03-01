@@ -58,6 +58,8 @@ function processAttrs(el, attrs) {
           location.hash = link;
           ev.preventDefault();
         });
+      } else {
+        el[k] = attrs[k];
       }
     } else {
       el[k] = attrs[k];
