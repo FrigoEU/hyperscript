@@ -12,6 +12,7 @@ declare namespace JSX {
     // HTML
     [P in keyof HTMLElementTagNameMap]: {
       class?: "you-mean-className"; // class should be className -> super annoying error: we block it like this
+      link?: "you-mean-href"; // link should be href -> super annoying error: we block it like this
       onClick?: "you-mean-onclick"; // onClick should be onclick -> hard to spot: we block it like this
       className?: string;
       onclick?: (me: MouseEvent) => any;
