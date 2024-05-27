@@ -49,6 +49,11 @@ function processAttrs(el, attrs) {
       el.setAttribute(k, attrs[k]);
     } else if (
       k === "href" &&
+      el.nodeName.toLowerCase() === "a"
+      && (attrs[k] === null || attrs[k] === undefined)){
+      // skip
+    } else if (
+      k === "href" &&
       el.nodeName.toLowerCase() === "a" &&
       typeof window !== "undefined" // only clientside
     ) {
