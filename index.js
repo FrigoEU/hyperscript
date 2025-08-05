@@ -2,6 +2,7 @@ var w = typeof window === "undefined" ? require("html-element") : window;
 
 var document = w.document;
 var Text = w.Text;
+var clientside = typeof window !== "undefined"
 
 function h(tagName, attrs) {
   var children = [].slice.call(arguments, 2);
@@ -20,19 +21,10 @@ module.exports = h;
 
 function processAttrs(el, attrs) {
   for (var k in attrs) {
-    if (attrs[k] === undefined){
-    } else if ("function" === typeof attrs[k]) {
+    if ("function" === typeof attrs[k]) {
       if (/^on\w+/.test(k)) {
         el.addEventListener(k.substring(2), attrs[k], false);
       }
-    } else if (k === "className") {
-      if (typeof window !== "undefined" /* only clientside */){
-        el.className = attrs[k]; // setAttribute doesn't work on className, only on class, but .className is slightly faster and works well in browsers
-      } else {
-        // Serverside: just use setAttribute for everything, since html-element is really inconsistent otherwise
-        el.setAttribute("class", attrs[k]);
-      }
-
     } else if (k === "style") {
       if ("string" === typeof attrs[k]) {
         el.style.cssText = attrs[k];
@@ -62,7 +54,7 @@ function processAttrs(el, attrs) {
     } else if (
       k === "href" &&
       el.nodeName.toLowerCase() === "a" &&
-      typeof window !== "undefined" // only clientside
+      clientside // only clientside
     ) {
       const link = attrs[k];
       if (link && link[0] === "#"){
@@ -71,10 +63,18 @@ function processAttrs(el, attrs) {
           ev.preventDefault();
         });
       } else {
-        el.setAttribute(k, attrs[k]);
+        el[k] = attrs[k]; 
       }
     } else {
-      el.setAttribute(k, attrs[k]);
+      if (clientside){
+        // clientside: setting properties works the best: fastest, synchronizes with attributes, handles false, nulls, undefined's, etc...
+        el[k] = attrs[k]; 
+      } else {
+        // Serverside: just use setAttribute for everything, since html-element is really inconsistent otherwise
+        // mainly it doesn't update the attributes, so cloning a node becomes almost impossible
+        // className is not a real property -> have to change that to class
+        el.setAttribute(k === "className" ? "class" : k, attrs[k]);
+      }
     }
   }
 }
