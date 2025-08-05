@@ -20,7 +20,8 @@ module.exports = h;
 
 function processAttrs(el, attrs) {
   for (var k in attrs) {
-    if ("function" === typeof attrs[k]) {
+    if (attrs[k] === undefined){
+    } else if ("function" === typeof attrs[k]) {
       if (/^on\w+/.test(k)) {
         el.addEventListener(k.substring(2), attrs[k], false);
       }
