@@ -73,7 +73,9 @@ function processAttrs(el, attrs) {
         // Serverside: just use setAttribute for everything, since html-element is really inconsistent otherwise
         // mainly it doesn't update the attributes, so cloning a node becomes almost impossible
         // className is not a real property -> have to change that to class
-        el.setAttribute(k === "className" ? "class" : k, attrs[k]);
+        if (attrs[k] !== undefined){
+          el.setAttribute(k === "className" ? "class" : k, attrs[k]);
+        }
       }
     }
   }
