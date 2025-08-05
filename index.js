@@ -30,7 +30,7 @@ function processAttrs(el, attrs) {
         el.className = attrs[k]; // setAttribute doesn't work on className, only on class, but .className is slightly faster and works well in browsers
       } else {
         // Serverside: just use setAttribute for everything, since html-element is really inconsistent otherwise
-        el.setAttribute(k, attrs[k]);
+        el.setAttribute("class", attrs[k]);
       }
 
     } else if (k === "style") {
