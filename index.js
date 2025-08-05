@@ -24,6 +24,8 @@ function processAttrs(el, attrs) {
       if (/^on\w+/.test(k)) {
         el.addEventListener(k.substring(2), attrs[k], false);
       }
+    } else if (k === "className") {
+      el.className = attrs[k]; // setAttribute doesn't work on className, only on class, but .className is slightly faster
     } else if (k === "style") {
       if ("string" === typeof attrs[k]) {
         el.style.cssText = attrs[k];
