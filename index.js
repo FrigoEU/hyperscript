@@ -25,7 +25,13 @@ function processAttrs(el, attrs) {
         el.addEventListener(k.substring(2), attrs[k], false);
       }
     } else if (k === "className") {
-      el.className = attrs[k]; // setAttribute doesn't work on className, only on class, but .className is slightly faster
+      if (typeof window !== "undefined" /* only clientside */){
+        el.className = attrs[k]; // setAttribute doesn't work on className, only on class, but .className is slightly faster and works well in browsers
+      } else {
+        // Serverside: just use setAttribute for everything, since html-element is really inconsistent otherwise
+        el.setAttribute(k, attrs[k]);
+      }
+
     } else if (k === "style") {
       if ("string" === typeof attrs[k]) {
         el.style.cssText = attrs[k];
